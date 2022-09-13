@@ -1,7 +1,7 @@
 # reliability analyses for data from a wearable device as described in Dudarev et al 2022.
 # two types of reliability are computed: between participant and within participant.
 # between participant reliability takes equal number of observations for at least 2 individuals and computes ICC. 
-# within participant reliability is computed in two ways, time-sensitive and random, as describe din Dudarev et al 2022.
+# within participant reliability is computed in two ways, time-sensitive and random, as described in Dudarev et al 2022.
 
 # BETWEEN PARTICIPANT RELIABILITY is estimated with ICC. 
 # Data structure accepted is either 
@@ -14,7 +14,7 @@
 # method returns a distribution of estimates of reliability and average of that distribution as a final estimate of within-participant
 # Data structure accepted is: 
 # 3 variables: participant, physiological measurement, and the variable that groups datapoints within participants (in our case, days).
-# The code includes a quick data cleaning script that removes phsyiological variable = 0 and datapoints above and below 2SD from the mean per 
+# The code includes a quick data cleaning script that removes physiological variable = 0 and datapoints above and below 2SD from the mean per 
 # participant. 
 # INPUT WILL BE NEEDED in lines 60,67-70.
 
@@ -36,13 +36,13 @@ df <- data_bs[,c("Participant ID","averageHRV.day")] %>% na.omit
 names(df)[1] <- c("participant")
 
 # check if we have more than one value per participant, restructure so that data has 1 row per participant  
-# and as many columns as the minimum number of observations within participants
+# and as many columns as the maximum number of observations within participants
 num_participants <- length(unique(df$participant))
 if ( num_participants < nrow(df)) {
   #determine number of observations per participant
-  min_of_x <- min(count(df$participant))
-  #select first "min_of_x" observations per participants
-  df_icc <- lapply(split(df,df$participant),function(x) {t(x[1:min_of_x,2]) %>% unname}) %>% do.call(rbind,.) %>% as.data.frame
+  max_of_x <- max(count(df$participant)[2])
+  #restructure the data
+  df_icc <- lapply(split(df,df$participant),function(y) {t(y[1:max_of_x,2]) %>% unname}) %>% do.call(rbind,.) %>% as.data.frame
 } else {
   df_icc <- within(df,rm("participant"))
   }
@@ -60,7 +60,7 @@ library(lmerTest)
 data_ws <- read_excel('./Dudarev et al 2022 data.xlsx', sheet = "Biometric_raw_data")
 
 # define variables: participant, X for the measurement of interest (in our case, HRV). Y for the variable that groups datapoints within participants
-# (in our case, days). t for the variable that contains timestamps,
+# (in our case, days). t for the variable that contains timestamps.
 # X accepts only one column, with several datapoints for each participant arranged in rows.
 # prepare dataframe
 # INPUT: replace variable names on the right side of the equations in lines 67-70.

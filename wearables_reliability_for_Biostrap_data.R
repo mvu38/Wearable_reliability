@@ -39,13 +39,13 @@ for (x in c("averageHRV.day","averageHRV.nig","averageBPM.day","averageBPM.nig")
   df <- data_bs[,c("Participant ID",x)] %>% na.omit
   names(df)[1] <- c("participant")
   # check if we have more than one value per participant, restructure so that data has 1 row per participant  
-  # and as many columns as the minimum number of observations within participants
+  # and as many columns as the maximum number of observations within participants
   num_participants <- length(unique(df$participant))
   if ( num_participants < nrow(df)) {
     #determine number of observations per participant
-    min_of_x <- min(count(df$participant))
-    #select first "min_of_x" observations per participants
-    df_icc <- lapply(split(df,df$participant),function(y) {t(y[1:min_of_x,2]) %>% unname}) %>% do.call(rbind,.) %>% as.data.frame
+    max_of_x <- max(count(df$participant)[2])
+    #restructure the data
+    df_icc <- lapply(split(df,df$participant),function(y) {t(y[1:max_of_x,2]) %>% unname}) %>% do.call(rbind,.) %>% as.data.frame
   } else {
     df_icc <- within(df,rm("participant"))
   }
